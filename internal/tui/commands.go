@@ -460,7 +460,7 @@ func executeReplicate(ctx context.Context, vals map[string]string, onReady func(
 	fmt.Fprintf(&b, "  elapsed: %s\n", elapsed.Truncate(time.Millisecond))
 	fmt.Fprintf(&b, "  speed:   %.0f records/sec", rps)
 
-	return ExecuteResult{Stats: &stats, Summary: b.String(), Err: runErr}
+	return ExecuteResult{Stats: stats, Summary: b.String(), Err: runErr}
 }
 
 func executeStats(ctx context.Context, vals map[string]string) ExecuteResult {
@@ -616,7 +616,7 @@ func executeImport(ctx context.Context, vals map[string]string, onReady func(*pi
 	fmt.Fprintf(&b, "  elapsed: %s\n", elapsed.Truncate(time.Millisecond))
 	fmt.Fprintf(&b, "  speed:   %.0f records/sec", rps)
 
-	return ExecuteResult{Stats: &stats, Summary: b.String(), Err: runErr}
+	return ExecuteResult{Stats: stats, Summary: b.String(), Err: runErr}
 }
 
 func executeExport(ctx context.Context, vals map[string]string, onReady func(*pipeline.Stats)) ExecuteResult {
@@ -674,7 +674,7 @@ func executeExport(ctx context.Context, vals map[string]string, onReady func(*pi
 	fmt.Fprintf(&b, "  elapsed: %s\n", elapsed.Truncate(time.Millisecond))
 	fmt.Fprintf(&b, "  speed:   %.0f records/sec", rps)
 
-	return ExecuteResult{Stats: &stats, Summary: b.String(), Err: runErr}
+	return ExecuteResult{Stats: stats, Summary: b.String(), Err: runErr}
 }
 
 func executeGenerate(ctx context.Context, vals map[string]string, onReady func(*pipeline.Stats)) ExecuteResult {
@@ -730,7 +730,7 @@ func executeGenerate(ctx context.Context, vals map[string]string, onReady func(*
 	fmt.Fprintf(&b, "  elapsed: %s\n", elapsed.Truncate(time.Millisecond))
 	fmt.Fprintf(&b, "  speed:   %.0f records/sec", rps)
 
-	return ExecuteResult{Stats: &stats, Summary: b.String(), Err: runErr}
+	return ExecuteResult{Stats: stats, Summary: b.String(), Err: runErr}
 }
 
 func executeCompare(ctx context.Context, vals map[string]string) ExecuteResult {

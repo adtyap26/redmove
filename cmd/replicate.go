@@ -183,7 +183,7 @@ func runReplicate(ctx context.Context, cfg replicateConfig) error {
 
 	if cfg.mode == "live" {
 		fmt.Printf("Live replicating %s → %s (transfer: %s, match: %q)\n", cfg.sourceURI, cfg.targetURI, transferMode, cfg.match)
-		fmt.Println("Listening for keyspace notifications... (Ctrl+C to stop)\n")
+		fmt.Println("Listening for keyspace notifications... (Ctrl+C to stop)")
 	} else {
 		fmt.Printf("Replicating %s → %s (mode: %s, transfer: %s, match: %q)\n\n", cfg.sourceURI, cfg.targetURI, modeLabel, transferMode, cfg.match)
 	}

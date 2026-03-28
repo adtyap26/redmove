@@ -75,7 +75,7 @@ func New(r Reader, proc Processor, w Writer, opts ...Option) *Pipeline {
 }
 
 // Run executes the pipeline. It blocks until completion or context cancellation.
-func (p *Pipeline) Run(ctx context.Context) (Stats, error) {
+func (p *Pipeline) Run(ctx context.Context) (*Stats, error) {
 	p.stats.StartTime = time.Now()
 	defer func() { p.stats.EndTime = time.Now() }()
 
@@ -147,5 +147,5 @@ func (p *Pipeline) Run(ctx context.Context) (Stats, error) {
 	}()
 
 	wg.Wait()
-	return p.stats, firstErr
+	return &p.stats, firstErr
 }
