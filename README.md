@@ -13,6 +13,8 @@ A fast, MIT-licensed alternative to RIOTx. Single static binary, TUI-enabled Red
 - **Stats** — Keyspace analysis (type distribution, top prefixes, TTL buckets)
 - **Ping** — Connectivity check with latency percentiles
 - **TUI** — Interactive terminal UI for all operations
+- **Redis module support** — ReJSON (JSON.GET/SET), RedisTimeSeries (TS.RANGE/ADD) in struct mode
+- **RediSearch index migration** — `--migrate-indexes` copies indexes via FT._LIST + FT.INFO + FT.CREATE
 - **Key filtering** — `--key-type`, `--key-include`, `--key-exclude`, `--mem-limit`
 - **Shell completion** — bash, zsh, fish, powershell
 
@@ -97,6 +99,16 @@ make build-static
 # Live replication modes
 ./redmove replicate --source redis://src:6379 --target redis://dst:6379 --mode live
 ./redmove replicate --source redis://src:6379 --target redis://dst:6379 --mode liveonly
+
+# Struct mode with Redis module types (ReJSON, TimeSeries)
+./redmove replicate --source redis://src:6379 --target redis://dst:6379 --struct
+
+# Migrate RediSearch indexes after replication
+./redmove replicate --source redis://src:6379 --target redis://dst:6379 --migrate-indexes
+
+# Stream ID modes (struct mode)
+./redmove replicate --source redis://src:6379 --target redis://dst:6379 --struct --stream-id preserve
+./redmove replicate --source redis://src:6379 --target redis://dst:6379 --struct --stream-id reset
 ```
 
 ## Performance Tuning
