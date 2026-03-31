@@ -151,6 +151,45 @@ func ReadValue(ctx context.Context, client goredis.Cmdable, key, typ string) (ma
 		}
 		return map[string]any{"entries": entries}, nil
 
+	case "ReJSON-RL", "json":
+		// RedisJSON module: read full document at root path.
+		val, err := client.JSONGet(ctx, key, "$").Result()
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"json": val}, nil
+
+	case "TSDB-TYPE":
+		// RedisTimeSeries module: read all samples.
+		// Cmdable doesn't expose Do; assert to concrete doer interface.
+		type doer interface {
+			Do(ctx context.Context, args ...any) *goredis.Cmd
+		}
+		d, ok := client.(doer)
+		if !ok {
+			return nil, fmt.Errorf("redis client does not support raw commands for TimeSeries")
+		}
+		res, err := d.Do(ctx, "TS.RANGE", key, "-", "+").Result()
+		if err != nil {
+			return nil, err
+		}
+		rawSamples, ok := res.([]any)
+		if !ok {
+			return nil, fmt.Errorf("unexpected TS.RANGE result type")
+		}
+		samples := make([]any, 0, len(rawSamples))
+		for _, s := range rawSamples {
+			pair, ok := s.([]any)
+			if !ok || len(pair) < 2 {
+				continue
+			}
+			samples = append(samples, map[string]any{
+				"ts":  pair[0],
+				"val": pair[1],
+			})
+		}
+		return map[string]any{"samples": samples}, nil
+
 	default:
 		return nil, fmt.Errorf("unsupported type: %s", typ)
 	}

@@ -108,6 +108,7 @@ func specForOperation(op Operation) FormSpec {
 				{Key: "queue-size", Label: "Queue size (channel buffer)", Placeholder: "10000", DefaultValue: "10000"},
 				{Key: "stream-id", Label: "Stream ID mode", Kind: FieldSelect, Choices: []string{"preserve", "reset"}, DefaultValue: "preserve"},
 				{Key: "struct", Label: "Struct mode (type-specific)", Kind: FieldToggle},
+				{Key: "migrate-indexes", Label: "Migrate RediSearch indexes", Kind: FieldToggle},
 				{Key: "target-cluster", Label: "Target is cluster", Kind: FieldToggle},
 				{Key: "target-password", Label: "Target password", Placeholder: "(optional)"},
 				{Key: "target-db", Label: "Target DB", Placeholder: "0", DefaultValue: "0"},
@@ -459,6 +460,14 @@ func executeReplicate(ctx context.Context, vals map[string]string, onReady func(
 	fmt.Fprintf(&b, "  records: %d\n", written)
 	fmt.Fprintf(&b, "  elapsed: %s\n", elapsed.Truncate(time.Millisecond))
 	fmt.Fprintf(&b, "  speed:   %.0f records/sec", rps)
+
+	if vals["migrate-indexes"] == "true" {
+		n, idxErr := redisclient.MigrateIndexes(ctx, srcClient, dstClient)
+		fmt.Fprintf(&b, "\n  indexes migrated: %d", n)
+		if idxErr != nil {
+			fmt.Fprintf(&b, " (warning: %v)", idxErr)
+		}
+	}
 
 	return ExecuteResult{Stats: stats, Summary: b.String(), Err: runErr}
 }

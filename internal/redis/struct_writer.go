@@ -169,6 +169,30 @@ func writeRecord(ctx context.Context, pipe goredis.Pipeliner, rec pipeline.Recor
 			})
 		}
 
+	case "ReJSON-RL", "json":
+		// RedisJSON module: write full document at root path.
+		val, ok := rec.Fields["json"]
+		if !ok {
+			return fmt.Errorf("json record missing 'json' field")
+		}
+		pipe.JSONSet(ctx, rec.Key, "$", val)
+
+	case "TSDB-TYPE":
+		// RedisTimeSeries module: create key then add each sample.
+		samples, ok := rec.Fields["samples"].([]any)
+		if !ok || len(samples) == 0 {
+			return fmt.Errorf("timeseries record missing 'samples' field")
+		}
+		// Create the TS key first (ignore error if already exists).
+		pipe.Do(ctx, "TS.CREATE", rec.Key, "DUPLICATE_POLICY", "LAST")
+		for _, s := range samples {
+			sample, ok := s.(map[string]any)
+			if !ok {
+				continue
+			}
+			pipe.Do(ctx, "TS.ADD", rec.Key, sample["ts"], sample["val"])
+		}
+
 	default:
 		return fmt.Errorf("unsupported type: %s", rec.Type)
 	}

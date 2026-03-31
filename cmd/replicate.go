@@ -27,6 +27,7 @@ func newReplicateCmd() *cobra.Command {
 		keyExclude     []string
 		memLimit       string
 		streamIDMode   string
+		migrateIndexes bool
 	)
 
 	cmd := &cobra.Command{
@@ -49,6 +50,7 @@ func newReplicateCmd() *cobra.Command {
 				keyExclude:     keyExclude,
 				memLimit:       memLimit,
 				streamIDMode:   streamIDMode,
+				migrateIndexes: migrateIndexes,
 			})
 		},
 	}
@@ -69,6 +71,7 @@ func newReplicateCmd() *cobra.Command {
 	f.StringSliceVar(&keyExclude, "key-exclude", nil, "Exclude keys matching glob pattern (repeatable)")
 	f.StringVar(&memLimit, "mem-limit", "", "Skip keys larger than this (e.g. 10MB, 1GB)")
 	f.StringVar(&streamIDMode, "stream-id", "preserve", "Stream entry ID mode: preserve or reset")
+	f.BoolVar(&migrateIndexes, "migrate-indexes", false, "Migrate RediSearch indexes after replication")
 
 	cmd.MarkFlagRequired("source")
 	cmd.MarkFlagRequired("target")
@@ -92,6 +95,7 @@ type replicateConfig struct {
 	keyExclude     []string
 	memLimit       string
 	streamIDMode   string
+	migrateIndexes bool
 }
 
 func runReplicate(ctx context.Context, cfg replicateConfig) error {
@@ -208,6 +212,16 @@ func runReplicate(ctx context.Context, cfg replicateConfig) error {
 	if err != nil && err != context.Canceled {
 		return fmt.Errorf("replication failed: %w", err)
 	}
+
+	if cfg.migrateIndexes {
+		fmt.Println("\nMigrating RediSearch indexes...")
+		n, idxErr := redisclient.MigrateIndexes(ctx, srcClient, dstClient)
+		fmt.Printf("  indexes migrated: %d\n", n)
+		if idxErr != nil {
+			fmt.Printf("  index migration warning: %v\n", idxErr)
+		}
+	}
+
 	fmt.Println("\nDone.")
 	return nil
 }
